@@ -2,5 +2,6 @@
   "type": "postgres",
   "database": "bookstore",
   "entities": ["src/**/**.entity{.ts,.js}"],
-  "synchronize": true
+  "synchronize": true,
+  "logging": true
 }
