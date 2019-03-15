@@ -6,10 +6,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
 
 @Module({
-  imports: [BooksModule],
+  imports: [BooksModule, TypeOrmModule.forRoot()],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {
-  // constructor(private readonly connection: Connection) {}
+  constructor(private readonly connection: Connection) {}
 }

@@ -1,48 +1,47 @@
+import { Book } from './books.entity';
 import { CreateBookDTO } from './dto/create-book.dto';
 import { Injectable, HttpException } from '@nestjs/common';
 import { BOOKS } from '../mocks/books.mocks';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, getConnection, DeleteResult } from 'typeorm';
 
 export interface IBooksService {
-  getBooks(): Promise<CreateBookDTO[]>;
+  getBooks(): Promise<Book[]>;
+  getBook(bookID: number): Promise<Book>;
+  deleteBook(bookID: number): Promise<DeleteResult>;
+  addBook(book: CreateBookDTO): Promise<CreateBookDTO>;
 }
 
 @Injectable()
 export class BooksService implements IBooksService {
   books = BOOKS;
 
-  getBooks(): Promise<any> {
-    return new Promise(resolve => {
-      resolve(this.books);
-    });
+  constructor(
+    @InjectRepository(Book)
+    private readonly bookRepository: Repository<Book>
+  ) {}
+
+  async getBooks(): Promise<Book[]> {
+    return await this.bookRepository.find();
   }
 
-  getBook(bookID: string): Promise<any> {
-    let id: number = Number(bookID);
-    return new Promise(resolve => {
-      const book = this.books.find(book => book.id === id);
-      if (!book) {
-        throw new HttpException('Book does not exist!', 404);
-      }
-      resolve(book);
-    });
+  async getBook(bookID: number): Promise<Book> {
+    let book = await this.bookRepository.findOne(bookID);
+
+    if (!book) {
+      throw new HttpException('Book does not exist!', 404)
+    } else {
+      return book;
+    }
   }
 
-  addBook(book): Promise<any> {
-    return new Promise(resolve => {
-      this.books.push(book);
-      resolve(this.books);
-    });
+  async addBook(book: CreateBookDTO): Promise<CreateBookDTO> {
+    const user = this.bookRepository.create(book);
+    return await this.bookRepository.save(user);
   }
 
-  deleteBook(bookID): Promise<any> {
+  async deleteBook(bookID: number): Promise<DeleteResult> {
     let id = Number(bookID);
-    return new Promise(resolve => {
-      let index = this.books.findIndex(book => book.id === id);
-      if (index === -1) {
-        throw new HttpException('Book does not exist!', 404);
-      }
-      this.books.splice(1, index);
-      resolve(this.books);
-    });
+    return await this.bookRepository.createQueryBuilder().delete().where('id = :id', { id }).execute();
   }
 }

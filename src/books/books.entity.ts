@@ -5,10 +5,10 @@ export class Book {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 500, type: 'text' })
+  @Column('text')
   title: string;
 
-  @Column('longtext')
+  @Column('text')
   description: string;
 
   @Column('text')
